@@ -1,8 +1,10 @@
+from numpy import sqrt as np_sqrt, log as np_log, e as np_e
+
 class measurements:
     """Measurements class for handling measurements"""
 
     def __init__(
-        self, measurement: float, error_value: float = 0, error_range: float = 0
+        self, measurement: float, error_value: float = 0, error_range: float = 0, override_error: float = None
     ) -> None:
         """Create new measurement
 
@@ -12,34 +14,55 @@ class measurements:
             error_range (float, optional): error from instrument according to the recording range. Defaults to 0.
         """
         self.value = measurement
-        self.error = error(error_value, error_range)
+        if not override_error:
+            self.err = error_value * measurement + error_range
+        else:
+            self.err = override_error
 
     def get_error_txt(self) -> str:
-        return f"{self.error.tostring()}"
-    
-    def value(self):
-        return self.value
+        return f"{self.err}"
 
-    class error:
-        """Error class for handling measurement errors and their propagation"""
+    def __pow__(self, power:float):
+        new_val = self.value ** power
+        new_err = new_val*power*(self.err/self.value)
+        return measurements(new_val, override_error=new_err)
 
-        def __init__(self, measurement, error_value: float = 0, error_range: float = 0) -> None:
-            self.error_value = error_value
-            self.error_range = error_range
-            self.measurement = measurement
+    def ln(self):
+        new_val = np_log(self.value)
+        new_err = self.err/self.value
+        return measurements(new_val, override_error=new_err)
 
-        def mult_const(self, const: float):
-            return const * self.value
+    def exp(self):
+        new_val = np_e**self.value
+        new_err = new_val*self.err
+        return measurements(new_val, override_error=new_err)
 
-        def pow(self, other_measurement, power: float):
-            return self.measurement.value() * (power * (other_measurement.error()/other_measurement.value()))
+    def __add__(self, other_meas):
+        new_val = self.value + other_meas.value
+        new_err = np_sqrt(self.err**2 + other_meas.err**2)
+        return measurements(new_val, override_error=new_err)
 
-        @classmethod
-        def from_errors(cls, errors: list):
-            pass
+    def __sub__(self, other_meas):
+        new_val = self.value - other_meas.value
+        new_err = np_sqrt(self.err**2 + other_meas.err**2)
+        return measurements(new_val, override_error=new_err)
 
-        def tostring(self) -> str:
-            return f"{self.error_value}x+-{self.error_range}"
+    def __mult__(self, other_meas):
+        match other_meas:
+            case float() | int():
+                new_err = self.err * other_meas
+                new_val = self.value * other_meas
+            case measurements():
+                new_err = np_sqrt(self.err**2 + other_meas.err**2)
+                new_val = self.value / other_meas.value
+        return measurements(new_val, override_error=new_err)
 
-        def value(self, measurement: float = 0) -> float:
-            return self.error_value * measurement + self.error_range
+    def __truediv__(self, other_meas):
+        match other_meas:
+            case float() | int():
+                new_err = self.err / other_meas
+                new_val = self.value / other_meas
+            case measurements():
+                new_err = np_sqrt(self.err**2 + other_meas.err**2)
+                new_val = self.value / other_meas.value
+        return measurements(new_val, override_error=new_err)
