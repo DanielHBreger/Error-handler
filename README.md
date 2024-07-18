@@ -31,3 +31,7 @@ Measurements support various mathematical operations:
 - powers
 
 Just use the objects as regular numbers and the errors will be handled on their own via the formulas relevant for each.
+
+# Credits
+
+Made by Daniel Breger, 2024.
