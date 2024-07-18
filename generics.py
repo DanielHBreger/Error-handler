@@ -52,7 +52,7 @@ class measurements:
         new_err = np_sqrt(self.err**2 + other_meas.err**2)
         return measurements(new_val, override_error=new_err)
 
-    def __mult__(self, other_meas):
+    def __mul__(self, other_meas):
         match other_meas:
             case float() | int():
                 new_err = self.err * other_meas
@@ -61,6 +61,8 @@ class measurements:
                 new_err = np_sqrt(self.err**2 + other_meas.err**2)
                 new_val = self.value / other_meas.value
         return measurements(new_val, override_error=new_err)
+
+    __rmul__ = __mul__
 
     def __truediv__(self, other_meas):
         match other_meas:
