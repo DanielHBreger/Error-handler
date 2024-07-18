@@ -24,6 +24,9 @@ class meas:
         else:
             self.err = override_error
 
+    def tostring(self):
+        return f"{self.value} +- {self.err}"
+
     def get_error_txt(self) -> str:
         return f"{self.err}"
 
@@ -58,8 +61,8 @@ class meas:
                 new_err = self.err * other_meas
                 new_val = self.value * other_meas
             case meas():
-                new_err = np_sqrt(self.err**2 + other_meas.err**2)
-                new_val = self.value / other_meas.value
+                new_err = np_sqrt((self.err/self.value)**2 + (other_meas.err/other_meas.value)**2)
+                new_val = self.value * other_meas.value
         return meas(new_val, override_error=new_err)
 
     __rmul__ = __mul__
@@ -70,6 +73,6 @@ class meas:
                 new_err = self.err / other_meas
                 new_val = self.value / other_meas
             case meas():
-                new_err = np_sqrt(self.err**2 + other_meas.err**2)
+                new_err = np_sqrt((self.err/self.value)**2 + (other_meas.err/other_meas.value)**2)
                 new_val = self.value / other_meas.value
         return meas(new_val, override_error=new_err)
