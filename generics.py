@@ -1,10 +1,15 @@
 from numpy import sqrt as np_sqrt, log as np_log, e as np_e
 
+
 class measurements:
     """Measurements class for handling measurements"""
 
     def __init__(
-        self, measurement: float, error_value: float = 0, error_range: float = 0, override_error: float = None
+        self,
+        measurement: float,
+        error_value: float = 0,
+        error_range: float = 0,
+        override_error: float = None,
     ) -> None:
         """Create new measurement
 
@@ -22,19 +27,19 @@ class measurements:
     def get_error_txt(self) -> str:
         return f"{self.err}"
 
-    def __pow__(self, power:float):
-        new_val = self.value ** power
-        new_err = new_val*power*(self.err/self.value)
+    def __pow__(self, power: float):
+        new_val = self.value**power
+        new_err = new_val * power * (self.err / self.value)
         return measurements(new_val, override_error=new_err)
 
     def ln(self):
         new_val = np_log(self.value)
-        new_err = self.err/self.value
+        new_err = self.err / self.value
         return measurements(new_val, override_error=new_err)
 
     def exp(self):
         new_val = np_e**self.value
-        new_err = new_val*self.err
+        new_err = new_val * self.err
         return measurements(new_val, override_error=new_err)
 
     def __add__(self, other_meas):
